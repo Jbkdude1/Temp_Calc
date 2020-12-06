@@ -47,4 +47,21 @@ for i in range(8):  #iterate from day 0 to day 7
             curmonth = 0
         curmonth += 1
         curday = numDays.iloc[curmonth - 1]
-print(min_temps, "\n", max_temps)
+sum_x = 91
+sum_sqrx = 819
+min_sum_y = 0
+min_sum_xy = 0
+max_sum_y = 0
+max_sum_xy = 0
+for item in range(14):
+    min_sum_y += min_temps.iloc[item]
+    min_sum_xy += (item * min_temps.iloc[item])
+    max_sum_y += max_temps.iloc[item]
+    max_sum_xy += (item * max_temps.iloc[item])
+min_a = ((min_sum_y * sum_sqrx) - (sum_x * min_sum_xy)) / ((14 * sum_sqrx) - (sum_x**2))
+min_b = ((14 * min_sum_xy) - (sum_x * min_sum_y)) / ((14 * sum_sqrx) - (sum_x**2))
+max_a = ((max_sum_y * sum_sqrx) - (sum_x * max_sum_xy)) / ((14 * sum_sqrx) - (sum_x**2))
+max_b = ((14 * max_sum_xy) - (sum_x * max_sum_y)) / ((14 * sum_sqrx) - (sum_x**2))
+print("Predicted temperatures for {}/{} based on temperature data from 2010-2019".format(str(month), str(day + 1)))
+print("Temperature high: {0:.1f} deg. F".format((max_b * 15) + max_a))
+print("Temperature low: {0:.1f} deg. F".format((min_b * 15) + min_a))
