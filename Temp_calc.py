@@ -61,7 +61,7 @@ for i in range(8):  #iterate from day 0 to day 7, filling series with average da
         if(curmonth == 12):                     # and final day of month becomes day 1 of next month
             curmonth = 0
         curmonth += 1
-        curday = numDays.iloc[curmonth - 1]
+        curday = 1
 
 sum_x = 91          #x is constant
 sum_sqrx = 819  
@@ -96,7 +96,12 @@ var_min /= 12
 var_max /= 12
 var_hum /= 12
 
-print("Predicted values for the week after {}/{} based on data from 2010-2019".format(str(month), str(day)))
+print("\nRegression formulas used:")
+print("high: {0:.1f}x + {1:.1f}, variance: {2:.1f}".format(max_b, max_a, var_max))
+print("low: {0:.1f}x + {1:.1f}, variance: {2:.1f}".format(min_b, min_a, var_min))
+print("humidity: {0:.1f}x + {1:.1f}, variance: {2:.1f}".format(hum_b, hum_a, var_hum))
+
+print("\nPredicted values for the week after {}/{} based on data from 2010-2019".format(str(month), str(day)))
 curday = day
 curmonth = month
 for p in range(7):
@@ -105,7 +110,7 @@ for p in range(7):
         if(curmonth == 12):
             curmonth = 0
         curmonth += 1
-        curday = numDays.iloc[curmonth - 1]     #outputs next 7 days predictions based on regression analysis
+        curday = 1                                           #outputs next 7 days predictions based on regression analysis
     print("{}/{}: ".format(str(curmonth), str(curday)))     #range uses regression formula +/- average variance
     print("\thigh: {0:.1f}-{1:.1f} deg. F\tlow: {2:.1f}-{3:.1f} deg. F".format((max_b * (p + 7)) + max_a - var_max, (max_b * (p + 7)) + max_a + var_max, (min_b * (p + 7)) + min_a - var_min, (min_b * (p + 7)) + min_a + var_min))
     print('\thumidity: {0:.1f}-{1:.1f}%'.format(((hum_b * (p + 7)) + hum_a) - var_hum, ((hum_b * (p + 7)) + hum_a) + var_hum))
