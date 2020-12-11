@@ -1,8 +1,12 @@
 import pandas as pd
 from datetime import date
 import xlrd
+import requests
+import json
+
 data = pd.read_excel('Daily_Temps.xlsx', 'DailyTemps')
 numDays = pd.Series([31,28,31,30,31,30,31,31,30,31,30,31])
+response = requests.get("https://api.openweathermap.org/data/2.5/onecall?lat=40.760780&lon=-111.891045&exclude=current,minutely,hourly,alerts&units=imperial&appid=6a6da2419cc44cad040cded0613f6276")
 
 def get_avg(d, m): #Given integers d(day) and m(month), calculates the average min and max temp, as well as humidity for said day from 2010-2019
     min_avg = 0
@@ -22,16 +26,18 @@ def get_avg(d, m): #Given integers d(day) and m(month), calculates the average m
     hum_avg /= 10
     return pd.Series({'min':min_avg, 'max':max_avg, 'hum':hum_avg})    #return series index 0 = min temp, 1 = max temp, 2 = humidity
 
-inp = input("Enter '1' to input a date. Enter any other key to use today's date.\n")    #takes user input to determine what date to use
+inp = input("\n\tEnter '1' to input a date. Enter any other key to use today's date.\n")    #takes user input to determine what date to use
 if(inp == '1'):
-    month = input("Enter the month in number format (january = 1, etc.)\n")
-    day = input("Enter the day\n")
+    month = input("\tEnter the month in number format (january = 1, etc.)\n")
+    day = input("\tEnter the day\n")
     month = int(month)
     day = int(day)
+    isToday = False
 else:
-    print("Using today's date.")        #if user doesn't input, uses today's date
+    print("\tUsing today's date.")        #if user doesn't input, uses today's date
     day = date.today().day
     month = date.today().month
+    isToday = True
 
 min_temps = pd.Series(0, index=['-6','-5','-4','-3','-2','-1','0','1','2','3','4','5','6','7'])#empty series to fill with data
 max_temps = pd.Series(0, index=['-6','-5','-4','-3','-2','-1','0','1','2','3','4','5','6','7'])
@@ -96,12 +102,12 @@ var_min /= 12
 var_max /= 12
 var_hum /= 12
 
-print("\nRegression formulas used:")
-print("high: {0:.1f}x + {1:.1f}, variance: {2:.1f}".format(max_b, max_a, var_max))
-print("low: {0:.1f}x + {1:.1f}, variance: {2:.1f}".format(min_b, min_a, var_min))
-print("humidity: {0:.1f}x + {1:.1f}, variance: {2:.1f}".format(hum_b, hum_a, var_hum))
+print("\n\tRegression formulas used:")
+print("\t\thigh: {0:.1f}x + {1:.1f}, variance: {2:.1f}".format(max_b, max_a, var_max))
+print("\t\tlow: {0:.1f}x + {1:.1f}, variance: {2:.1f}".format(min_b, min_a, var_min))
+print("\t\thumidity: {0:.1f}x + {1:.1f}, variance: {2:.1f}".format(hum_b, hum_a, var_hum))
 
-print("\nPredicted values for the week after {}/{} based on data from 2010-2019".format(str(month), str(day)))
+print("\n\tPredicted values for the week after {}/{} based on data from 2010-2019".format(str(month), str(day)))
 curday = day
 curmonth = month
 for p in range(7):
@@ -112,5 +118,24 @@ for p in range(7):
         curmonth += 1
         curday = 1                                           #outputs next 7 days predictions based on regression analysis
     print("{}/{}: ".format(str(curmonth), str(curday)))     #range uses regression formula +/- average variance
-    print("\thigh: {0:.1f}-{1:.1f} deg. F\tlow: {2:.1f}-{3:.1f} deg. F".format((max_b * (p + 7)) + max_a - var_max, (max_b * (p + 7)) + max_a + var_max, (min_b * (p + 7)) + min_a - var_min, (min_b * (p + 7)) + min_a + var_min))
+    print("\thigh: {0:.1f}-{1:.1f} F\tlow: {2:.1f}-{3:.1f} F".format((max_b * (p + 7)) + max_a - var_max, (max_b * (p + 7)) + max_a + var_max, (min_b * (p + 7)) + min_a - var_min, (min_b * (p + 7)) + min_a + var_min))
     print('\thumidity: {0:.1f}-{1:.1f}%'.format(((hum_b * (p + 7)) + hum_a) - var_hum, ((hum_b * (p + 7)) + hum_a) + var_hum))
+
+if(isToday):
+    json_daily_temps = response.json()['daily']
+    json_temp = []
+    json_date = []
+    json_hum = []
+    for d in json_daily_temps:
+        json_date.append(d['dt'])
+        json_temp.append(d['temp'])
+        json_hum.append(d['humidity'])
+    json_min = []
+    json_max = []
+    for t in json_temp:
+        json_min.append(t['min'])
+        json_max.append(t['max'])
+
+    print("\n\tPredicted values for the week after {}/{} from openweathermap.org".format(str(month), str(day)))
+    for it in range(1,8):
+        print("{}\n\thigh: {} F\tlow: {} F\n\thumidity: {}%".format(date.fromtimestamp(json_date[it]) , json_max[it], json_min[it], json_hum[it]))
