@@ -29,3 +29,13 @@ A quick method to get the required resources for running the program is by using
 	cd C:\users\<username>\Downloads\Temp_calc
 5. Run the file by typing the following command
 	python Temp_calc.py
+
+Otherwise if python is already installed, the packages can be installed individually through the command prompt:
+pip install pandas
+pip install xlrd
+pip install datetime
+pip install requests
+pip install json
+
+Run the file by typing the following command, after navigating to the containing folder:
+python Temp_calc.py
